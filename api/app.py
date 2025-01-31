@@ -41,15 +41,29 @@ def get_price_and_time(distance, vehicle):
     if not distance or not vehicle:
         return None, None
     try:
-        autonomy = int(vehicle['range']['chargetrip_range']['best'])
-        recharge_time = int(vehicle['battery']['usable_kwh'])
+        
+        autonomy = float(vehicle['range']['chargetrip_range']['best'])
+        recharge_time = float(vehicle['battery']['usable_kwh'])
+        distance = float(distance)
+        
         service = soap.TimePriceService()
-        result = service.get_time_price(int(distance), autonomy, recharge_time)
+        # Création d'une instance du service et appel explicite avec tous les arguments
+        result = service.get_time_price(ctx=None, distance=distance, autonomy=autonomy, recharge_time=recharge_time)
         result = list(result)
-        print("LOG time and price : ", result[0], result[1])
-        return result[0], result[1]
+        
+        if len(result) >= 2:
+            time = float(result[0])
+            price = float(result[1])
+            print("LOG - Résultat temps/prix =", {
+                "temps": time,
+                "prix": price
+            })
+            return time, price
+            
+        return None, None
+        
     except Exception as e:
-        print(f"Error calling SOAP service: {e}")
+        print(f"Erreur calcul temps/prix : {str(e)}")
         return None, None
 
 def calculate_route_distance(route_data):
@@ -61,10 +75,12 @@ def calculate_route_distance(route_data):
         for i in range(len(route_data)-1)
     )
 
-def get_required_charges(total_distance, autonomy, safety_margin=0.8):
+def get_required_charges(total_distance, autonomy, safety_margin=0.8, max_charges=10):
     if autonomy <= 0:
         return 0
-    return math.ceil(total_distance / (autonomy * safety_margin))
+    required_charges = math.ceil(total_distance / (autonomy * safety_margin))
+    required_charges = min(required_charges, max_charges)
+    return required_charges
 
 def get_search_points(segment):
     if not segment:
@@ -168,7 +184,6 @@ def process_route_request(start, end, selected_vehicle_id):
         
         total_distance = calculate_route_distance(route_data)
         time, price = get_price_and_time(total_distance, vehicle_details)
-        print("LOG time and price : ", time, price)
         
         return {
             'map': map_obj._repr_html_(),

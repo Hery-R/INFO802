@@ -229,11 +229,11 @@
         <h2><i class="fas fa-car-side"></i> {{ vehicle_details.naming.make }} {{ vehicle_details.naming.model }}</h2>
         
         {% if distance %}
-        <p><i class="fas fa-road"></i> <strong>Distance :</strong> {{ "%.2f"|format(distance) }} km</p>
+        <p><i class="fas fa-road"></i> <strong>Distance : </strong> {{ "%.2f"|format(distance) }} km</p>
         {% endif %}
         
-        <p><i class="fas fa-battery-full"></i> <strong>Autonomie :</strong> {{ vehicle_details.range.chargetrip_range.best }} km</p>
-        <p><i class="fas fa-charging-station"></i> <strong>Temps de recharge :</strong> {{ optimal_charging_time}} minutes</p>
+        <p><i class="fas fa-battery-full"></i> <strong>Autonomie : </strong> {{ vehicle_details.range.chargetrip_range.best }} km</p>
+        <p><i class="fas fa-charging-station"></i> <strong>Temps de recharge : </strong> {{ optimal_charging_time}} minutes</p>
         
         {% if vehicle_details.media.image.url %}
         <img src="{{ vehicle_details.media.image.url }}"
@@ -241,10 +241,10 @@
         {% endif %}
         
         <div class="calculation">
-            <p><i class="fas fa-clock"></i> <strong>Temps estimé :</strong> {{ time }} h</p>
-            <p><i class="fas fa-euro-sign"></i> <strong>Prix estimé :</strong> {{ price }} €</p>
+            <p><i class="fas fa-clock"></i> <strong>Temps estimé : </strong> {{ "%.2f"|format(time) }} h</p>
+            <p><i class="fas fa-euro-sign"></i> <strong>Prix estimé : </strong> {{ "%.2f"|format(price) }} €</p>
             {% if nb_stations %}
-            <p><i class="fas fa-plug"></i> <strong>Nombre de stations :</strong> {{ nb_stations }}</p>
+            <p><i class="fas fa-plug"></i> <strong>Nombre de stations : </strong> {{ nb_stations }}</p>
             {% endif %}
         </div>
     </div>
