@@ -167,33 +167,60 @@ def add_stations_to_map(map_obj, stations):
         ).add_to(map_obj)
 
 def process_route_request(start, end, selected_vehicle_id):
-    vehicle_details = vh.get_vehicle_details(selected_vehicle_id)
-    autonomy = float(vehicle_details["range"]["chargetrip_range"]["best"])
-    
-    start_lat, start_lon = ct.get_coordinates(start)
-    end_lat, end_lon = ct.get_coordinates(end)
-    
-    map_obj = create_map(start_lat, start_lon, end_lat, end_lon)
-    route_data, optimal_stations = calculate_optimal_route(
-        start_lat, start_lon, end_lat, end_lon, autonomy
-    )
-    
-    if route_data:
-        add_route_to_map(map_obj, route_data, start, end, start_lat, start_lon, end_lat, end_lon)
-        add_stations_to_map(map_obj, optimal_stations)
+    try:
+        vehicle_details = vh.get_vehicle_details(selected_vehicle_id)
+        autonomy = float(vehicle_details["range"]["chargetrip_range"]["best"])
         
-        total_distance = calculate_route_distance(route_data)
-        time, price = get_price_and_time(total_distance, vehicle_details)
+        start_lat, start_lon = ct.get_coordinates(start)
+        end_lat, end_lon = ct.get_coordinates(end)
         
-        return {
-            'map': map_obj._repr_html_(),
-            'distance': total_distance,
-            'time': time,
-            'price': price,
-            'nb_stations': len(optimal_stations)
-        }
-    
-    return None
+        route_data, optimal_stations = calculate_optimal_route(
+            start_lat, start_lon, end_lat, end_lon, autonomy
+        )
+        
+        if route_data:
+            total_distance = calculate_route_distance(route_data)
+            time, price = get_price_and_time(total_distance, vehicle_details)
+            
+            # Conversion des coordonnées de la route pour Leaflet (de [lon, lat] à [lat, lon])
+            formatted_route = [[coord[1], coord[0]] for coord in route_data]
+            
+            # Formatage des stations pour le frontend
+            formatted_stations = [{
+                'lat': station['lat'],
+                'lon': station['lon'],
+                'name': station.get('name', 'Station de recharge'),
+                'address': station.get('address', '')
+            } for station in optimal_stations]
+            
+            # Formatage des points de départ et d'arrivée
+            start_point = {
+                'lat': start_lat,
+                'lon': start_lon,
+                'name': start
+            }
+            
+            end_point = {
+                'lat': end_lat,
+                'lon': end_lon,
+                'name': end
+            }
+            
+            return {
+                'route': formatted_route,  # Liste de coordonnées [lat, lon] pour Leaflet
+                'stations': formatted_stations,
+                'startPoint': start_point,
+                'endPoint': end_point,
+                'distance': total_distance,
+                'time': time,
+                'price': price,
+                'nb_stations': len(optimal_stations)
+            }
+        
+        return None
+    except Exception as e:
+        print(f"Erreur dans process_route_request: {str(e)}")
+        return None
 
 def create_default_map():
     """Crée une carte par défaut centrée sur la France"""
