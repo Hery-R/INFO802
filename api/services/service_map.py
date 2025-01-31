@@ -1,11 +1,7 @@
-from flask import Flask, request, jsonify
-import requests
-import os
+import requests, os
 from dotenv import load_dotenv
 
 load_dotenv()
-app = Flask(__name__)
-
 def get_map(start_lat, start_lon, end_lat, end_lon):
     ORS_API_KEY = os.getenv('ORS_API_KEY')
     route_url = f"https://api.openrouteservice.org/v2/directions/driving-car"
@@ -22,16 +18,6 @@ def get_map(start_lat, start_lon, end_lat, end_lon):
 
     return route_data
 
-
-@app.route('/map', methods=['GET'])
-def map():
-    start_lat = request.args.get('start_lat')
-    start_lon = request.args.get('start_lon')
-    end_lat = request.args.get('end_lat')
-    end_lon = request.args.get('end_lon')
-    
+def get_route_data(start_lat, start_lon, end_lat, end_lon):
     route_data = get_map(start_lat, start_lon, end_lat, end_lon)
-    return jsonify(route_data)
-
-if __name__ == '__main__':
-    app.run(debug=True, port=5012)
+    return route_data['features'][0]['geometry']['coordinates']

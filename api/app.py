@@ -1,27 +1,19 @@
 from flask import Flask, request, render_template
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
 import folium
 import requests
 import math
-from zeep import Client
+import services.service_soap as soap
+import services.service_map as mp
+import services.service_city as ct
+import services.service_vehicle as vh
+import services.service_charging as ch
 
-app = Flask(__name__, template_folder='.')
+app = Flask(__name__)
 
-def get_route_data(start_lat, start_lon, end_lat, end_lon):
-    url = 'http://localhost:5012/map'
-    params = {
-        'start_lat': start_lat,
-        'start_lon': start_lon,
-        'end_lat': end_lat,
-        'end_lon': end_lon
-    }
-    try:
-        response = requests.get(url, params=params)
-        response.raise_for_status()
-        route_data = response.json()
-        return route_data['features'][0]['geometry']['coordinates']
-    except requests.RequestException as e:
-        print(f"Erreur lors de la récupération du trajet : {e}")
-        return None
+app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
+    '/soap': soap.wsgi_application
+})
 
 def split_route_data(route_data, n):
     if not route_data or n <= 0:
@@ -40,42 +32,6 @@ def split_route_data(route_data, n):
 
     return result
 
-def get_coordinates(city):
-    if not city:
-        return None
-        
-    url = 'http://localhost:5011/coordinates'
-    try:
-        response = requests.get(url, params={'city': city})
-        response.raise_for_status()
-        coordinates = response.json()
-        return coordinates.get('coordinates', [None, None])
-    except requests.RequestException as e:
-        print(f"Erreur lors de la récupération des coordonnées : {e}")
-        return None
-
-def get_vehicle_list():
-    url = "http://localhost:5013/vehicles"
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        return response.json()
-    except requests.RequestException as e:
-        print(f"Erreur lors de la requête : {e}")
-        return []
-
-def get_vehicle_details(vehicle_id):
-    if not vehicle_id:
-        return None
-        
-    url = f"http://localhost:5013/vehicle/{vehicle_id}"
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        return response.json()
-    except requests.RequestException as e:
-        print(f"Erreur lors de la récupération des détails du véhicule : {e}")
-        return None
     
 def get_optimal_charging_time(vehicle):
     connectors = vehicle['connectors']
@@ -85,11 +41,11 @@ def get_price_and_time(distance, vehicle):
     if not distance or not vehicle:
         return None, None
     try:
-        client = Client('http://localhost:8000/?wsdl')
         autonomy = int(vehicle['range']['chargetrip_range']['best'])
         recharge_time = int(vehicle['battery']['usable_kwh'])
-        result = client.service.get_time_price(int(distance), autonomy, recharge_time)
-        
+        service = soap.TimePriceService()
+        result = service.get_time_price(int(distance), autonomy, recharge_time)
+        result = list(result)
         print("LOG time and price : ", result[0], result[1])
         return result[0], result[1]
     except Exception as e:
@@ -119,31 +75,6 @@ def get_search_points(segment):
         ] if idx < len(segment)
     ]
 
-def find_nearest_station(point, search_radius=0.1):
-    try:
-        response = requests.get(
-            'http://localhost:5010/charge-stations',
-            params={
-                'start_lat': point[1] - search_radius,
-                'start_lon': point[0] - search_radius,
-                'end_lat': point[1] + search_radius,
-                'end_lon': point[0] + search_radius
-            }
-        )
-        response.raise_for_status()
-        stations = response.json()
-        
-        if stations.get('stations', {}).get('records'):
-            station = stations['stations']['records'][0]
-            return {
-                'lat': float(station['fields']['ylatitude']),
-                'lon': float(station['fields']['xlongitude']),
-                'name': station['fields'].get('n_station', 'Station inconnue')
-            }
-    except requests.RequestException as e:
-        print(f"Erreur lors de la recherche des bornes: {e}")
-    return None
-
 def is_duplicate_station(station, existing_stations, threshold=0.0001):
     return any(
         abs(s['lat'] - station['lat']) < threshold and 
@@ -160,7 +91,7 @@ def find_charging_stations(segments, number_charge_required):
             
         search_points = get_search_points(segments[i])
         for point in search_points:
-            station = find_nearest_station(point)
+            station = ch.find_nearest_station(point)
             if station and not is_duplicate_station(station, optimal_stations):
                 optimal_stations.append(station)
                 break
@@ -171,7 +102,7 @@ def calculate_optimal_route(start_lat, start_lon, end_lat, end_lon, autonomy):
     if autonomy <= 0:
         return None, None
 
-    route_data = get_route_data(start_lat, start_lon, end_lat, end_lon)
+    route_data = mp.get_route_data(start_lat, start_lon, end_lat, end_lon)
     if not route_data:
         return None, None
 
@@ -220,11 +151,11 @@ def add_stations_to_map(map_obj, stations):
         ).add_to(map_obj)
 
 def process_route_request(start, end, selected_vehicle_id):
-    vehicle_details = get_vehicle_details(selected_vehicle_id)["vehicle"]
+    vehicle_details = vh.get_vehicle_details(selected_vehicle_id)
     autonomy = float(vehicle_details["range"]["chargetrip_range"]["best"])
     
-    start_lat, start_lon = get_coordinates(start)
-    end_lat, end_lon = get_coordinates(end)
+    start_lat, start_lon = ct.get_coordinates(start)
+    end_lat, end_lon = ct.get_coordinates(end)
     
     map_obj = create_map(start_lat, start_lon, end_lat, end_lon)
     route_data, optimal_stations = calculate_optimal_route(
@@ -256,38 +187,61 @@ def create_default_map():
         zoom_start=6
     )
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    vehicles = get_vehicle_list()['vehicles']
-    print("LOG: vehicles", vehicles)
-    
-    if request.method == 'POST':
-        result = process_route_request(
-            request.form['start'],
-            request.form['end'],
-            request.form['vehicle']
-        )
-        if result:
-            vehicle_details = get_vehicle_details(request.form['vehicle'])["vehicle"]
-            optimal_charging_time = get_optimal_charging_time(vehicle_details)
-            return render_template(
-                'index.html',
-                vehicles=vehicles,
-                vehicle_details=vehicle_details,
-                optimal_charging_time=optimal_charging_time,
-                map=result['map'],
-                distance=result['distance'],
-                time=result['time'],
-                price=result['price'],
-                nb_stations=result['nb_stations']
-            )
+@app.route('/api/vehicles', methods=['GET'])
+def get_vehicles():
+    """Route pour obtenir la liste des véhicules"""
+    vehicles = vh.get_vehicle_list()
+    return {'vehicles': vehicles}
 
-   
+@app.route('/api/vehicle/<vehicle_id>', methods=['GET'])
+def get_vehicle(vehicle_id):
+    """Route pour obtenir les détails d'un véhicule spécifique"""
+    vehicle_details = vh.get_vehicle_details(vehicle_id)
+    optimal_charging_time = get_optimal_charging_time(vehicle_details)
+    return {
+        'vehicle_details': vehicle_details,
+        'optimal_charging_time': optimal_charging_time
+    }
+
+@app.route('/api/route', methods=['POST'])
+def calculate_route():
+    """Route pour calculer l'itinéraire et les stations de recharge"""
+    data = request.get_json()
+    start = data.get('start')
+    end = data.get('end')
+    vehicle_id = data.get('vehicle')
+    
+    if not all([start, end, vehicle_id]):
+        return {'error': 'Paramètres manquants'}, 400
+        
+    result = process_route_request(start, end, vehicle_id)
+    if result:
+        return result
+    return {'error': 'Impossible de calculer l\'itinéraire'}, 400
+
+@app.route('/api/charging-time', methods=['POST'])
+def calculate_charging_details():
+    """Route pour calculer le temps et le prix de recharge"""
+    data = request.get_json()
+    distance = data.get('distance')
+    vehicle_id = data.get('vehicle')
+    
+    if not all([distance, vehicle_id]):
+        return {'error': 'Paramètres manquants'}, 400
+        
+    vehicle_details = vh.get_vehicle_details(vehicle_id)["vehicle"]
+    time, price = get_price_and_time(distance, vehicle_details)
+    
+    return {
+        'charging_time': time,
+        'price': price
+    }
+
+@app.route('/api/default-map', methods=['GET'])
+def get_default_map():
+    """Route pour obtenir la carte par défaut"""
     default_map = create_default_map()
-    return render_template('index.html', 
-                         vehicles=vehicles, 
-                         map=default_map._repr_html_(), 
-                         vehicle_details=None)
+    return {'map': default_map._repr_html_()}
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)

@@ -1,10 +1,7 @@
-from flask import Flask, request
-import requests
-import os
+import requests, os
 from dotenv import load_dotenv
 
 load_dotenv()
-app = Flask(__name__)
 
 def get_coordinates(city):
     api_key = os.getenv('HERE_API_KEY')
@@ -22,11 +19,4 @@ def get_coordinates(city):
         print(f"Erreur lors de la requête : {response.status_code}")
         return None
 
-@app.route('/coordinates', methods=['GET', 'POST'])
-def city():
-    city = request.args.get('city')
-    coordinates = get_coordinates(city)
-    return {'coordinates': coordinates}
 
-if __name__ == '__main__':
-    app.run(debug=True, port=5011)
