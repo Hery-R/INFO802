@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planifiez votre Voyage</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            overflow: hidden;
+        }
+
+        #map {
+            height: 100vh;
+            width: 100vw;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .form-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 300px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .form-container h2 {
+            margin: 0 0 10px;
+            font-size: 18px;
+        }
+
+        .form-container label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .form-container select,
+        .form-container input,
+        .form-container button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .form-container button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .form-container button:hover {
+            background-color: #0056b3;
+        }
+
+        .vehicle-info {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 300px;
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .vehicle-info h2 {
+            margin: 0 0 10px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .vehicle-info p {
+            margin: 5px 0;
+            font-size: 16px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .vehicle-info img {
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map">
+        {% if map %}
+        {{ map|safe }}
+        {% endif %}
+    </div>
+
+    <div class="form-container">
+        <h2>Planifiez votre Voyage</h2>
+        <form method="POST">
+            <label for="vehicle">Choisissez votre véhicule :</label>
+            <select id="vehicle" name="vehicle" required>
+                {% for vehicle in vehicles %}
+                <option value="{{ vehicle.id }}">{{ vehicle.naming.make }} {{ vehicle.naming.model }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="start">Origine :</label>
+            <input type="text" id="start" name="start" placeholder="Ville de départ" required>
+
+            <label for="end">Destination :</label>
+            <input type="text" id="end" name="end" placeholder="Ville d'arrivée" required>
+
+            <button type="submit">Calculer</button>
+        </form>
+    </div>
+
+    {% if vehicle_details %}
+    <div class="vehicle-info">
+        <h2>Détails du Véhicule</h2>
+        <p><strong>Marque :</strong> {{ vehicle_details.naming.make }}</p>
+        <p><strong>Modèle :</strong> {{ vehicle_details.naming.model }}</p>
+        {% if distance %}
+        <p><strong>Distance : </strong>{{ "%.2f"|format(distance) }} km</p>
+        {% endif %}
+        <p><strong>Autonomie :</strong> {{ vehicle_details.range.chargetrip_range.best }} km</p>
+        <p><strong>Temps de recharge :</strong> {{ optimal_charging_time}} minutes</p>
+        <img src="{{ vehicle_details.media.image.url }}"
+            alt="{{ vehicle_details.naming.make }} {{ vehicle_details.naming.model }}" style="width:100%;">
+        <div class="calculation">
+            <p><strong>Temps estimé :</strong> {{ time }} h</p>
+            <p><strong>Prix estimé :</strong> {{ price }} €</p>
+        </div>
+    </div>
+
+    {% endif %}
+</body>
+
+</html>
