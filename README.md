@@ -1,4 +1,4 @@
-# Nom : RASOAMIARAMANANA Hery ny aina
+# Name : RASOAMIARAMANANA Hery ny aina
 ## Description : Mini project for INFO802
 
 # Technologies
