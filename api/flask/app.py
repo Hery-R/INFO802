@@ -2,10 +2,10 @@ from flask import Flask, request, render_template
 from zeep import Client
 import requests
 import math
-import services.service_map as mp
-import services.service_city as ct
-import services.service_vehicle as vh
-import services.service_charging as ch
+import service_map as mp
+import service_city as ct
+import service_vehicle as vh
+import service_charging as ch
 
 app = Flask(__name__)
 
