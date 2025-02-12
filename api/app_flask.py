@@ -114,38 +114,6 @@ def calculate_optimal_route(start_lat, start_lon, end_lat, end_lon, autonomy):
 
     return route_data, optimal_stations
 
-def create_map(start_lat, start_lon, end_lat, end_lon):
-    min_lat, max_lat = sorted([start_lat, end_lat])
-    min_lon, max_lon = sorted([start_lon, end_lon])
-    return folium.Map(
-        location=[(min_lat + max_lat) / 2, (min_lon + max_lon) / 2],
-        zoom_start=6
-    )
-
-def add_route_to_map(map_obj, route_data, start_name, end_name, start_lat, start_lon, end_lat, end_lon):
-    if route_data:
-        polyline = [(coord[1], coord[0]) for coord in route_data]
-        folium.PolyLine(polyline, color='blue', weight=3, opacity=0.8).add_to(map_obj)
-        
-        folium.Marker(
-            [start_lat, start_lon],
-            popup=f'Départ: {start_name}',
-            icon=folium.Icon(color='green')
-        ).add_to(map_obj)
-        
-        folium.Marker(
-            [end_lat, end_lon],
-            popup=f'Arrivée: {end_name}',
-            icon=folium.Icon(color='red')
-        ).add_to(map_obj)
-
-def add_stations_to_map(map_obj, stations):
-    for station in stations:
-        folium.Marker(
-            [station['lat'], station['lon']],
-            popup=f"Borne: {station['name']}",
-            icon=folium.Icon(color='orange', icon='plug', prefix='fa')
-        ).add_to(map_obj)
 
 def process_route_request(start, end, selected_vehicle_id):
     try:
