@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+const API_BASE_URL = 'https://chargingflask-drajetbaf6hvfddm.francecentral-01.azurewebsites.net';
+
 const TripForm = ({ onSubmit, loading }) => {
     const [vehicles, setVehicles] = useState([]);
     const [formData, setFormData] = useState({
@@ -13,7 +15,7 @@ const TripForm = ({ onSubmit, loading }) => {
     useEffect(() => {
         const fetchVehicles = async () => {
             try {
-                const response = await axios.get('/api/vehicles');
+                const response = await axios.get(`${API_BASE_URL}/api/vehicles`);
                 setVehicles(response.data.vehicles);
             } catch (err) {
                 setError('Erreur lors du chargement des véhicules');
