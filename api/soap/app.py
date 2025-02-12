@@ -2,6 +2,7 @@ from spyne import Float, Unicode, rpc, Application, ServiceBase, Iterable
 from spyne.protocol.soap import Soap11
 from spyne.server.wsgi import WsgiApplication
 from wsgiref.simple_server import make_server
+from flask_cors import CORS
 
 
 class TimePriceService(ServiceBase):
@@ -41,7 +42,8 @@ application = Application([TimePriceService], 'time_price.soap',
 wsgi_application = WsgiApplication(application)
 
 if __name__ == '__main__':
-    server = make_server('127.0.0.1', 8000, wsgi_application)
+    # Modifiez pour écouter sur toutes les interfaces
+    server = make_server('0.0.0.0', 8000, wsgi_application)
     server.serve_forever()
 
 

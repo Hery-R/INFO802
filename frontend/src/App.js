@@ -4,6 +4,8 @@ import Map from './components/Map';
 import TripForm from './components/TripForm';
 import VehicleInfo from './components/VehicleInfo';
 
+const API_BASE_URL = 'https://chargingflask-drajetbaf6hvfddm.francecentral-01.azurewebsites.net';
+
 const App = () => {
     const [loading, setLoading] = useState(false);
     const [vehicleDetails, setVehicleDetails] = useState(() => {
@@ -47,11 +49,11 @@ const App = () => {
         setLoading(true);
         try {
             // Récupération des détails du véhicule
-            const vehicleResponse = await axios.get(`/api/vehicle/${formData.vehicle}`);
+            const vehicleResponse = await axios.get(`${API_BASE_URL}/api/vehicle/${formData.vehicle}`);
             setVehicleDetails(vehicleResponse.data.vehicle_details);
 
             // Calcul de l'itinéraire
-            const routeResponse = await axios.post('/api/route', {
+            const routeResponse = await axios.post(`${API_BASE_URL}/api/route`, {
                 start: formData.start,
                 end: formData.end,
                 vehicle: formData.vehicle
