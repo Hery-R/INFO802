@@ -54,13 +54,13 @@ const VehicleInfo = ({ vehicleDetails, routeInfo }) => {
                     {time && (
                         <p>
                             <i className="fas fa-clock"></i>
-                            <strong>Temps estimé : </strong> {time.toFixed(2)} h
+                            <strong>Temps estimé : </strong> {time} h
                         </p>
                     )}
                     {price && (
                         <p>
                             <i className="fas fa-euro-sign"></i>
-                            <strong>Prix estimé : </strong> {price.toFixed(2)} €
+                            <strong>Prix estimé : </strong> {price} €
                         </p>
                     )}
                     {nbStations && (

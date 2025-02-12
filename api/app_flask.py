@@ -1,19 +1,13 @@
 from flask import Flask, request, render_template
-from werkzeug.middleware.dispatcher import DispatcherMiddleware
-import folium
+from zeep import Client
 import requests
 import math
-import services.service_soap as soap
 import services.service_map as mp
 import services.service_city as ct
 import services.service_vehicle as vh
 import services.service_charging as ch
 
 app = Flask(__name__)
-
-app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
-    '/soap': soap.wsgi_application
-})
 
 def split_route_data(route_data, n):
     if not route_data or n <= 0:
@@ -38,33 +32,20 @@ def get_optimal_charging_time(vehicle):
     return min(connector['time'] for connector in connectors)
 
 def get_price_and_time(distance, vehicle):
-    if not distance or not vehicle:
-        return None, None
     try:
         
         autonomy = float(vehicle['range']['chargetrip_range']['best'])
         recharge_time = float(vehicle['battery']['usable_kwh'])
         distance = float(distance)
-        
-        service = soap.TimePriceService()
-        # Création d'une instance du service et appel explicite avec tous les arguments
-        result = service.get_time_price(ctx=None, distance=distance, autonomy=autonomy, recharge_time=recharge_time)
-        result = list(result)
-        
-        if len(result) >= 2:
-            time = float(result[0])
-            price = float(result[1])
-            print("LOG - Résultat temps/prix =", {
-                "temps": time,
-                "prix": price
-            })
-            return time, price
-            
-        return None, None
-        
+        client = Client('http://localhost:8000?wsdl')
+        result = client.service.get_time_price(distance, autonomy, recharge_time)
+        print("LOG - time", result[0], "price", result[1])
+        return round(float(result[0]), 2), round(float(result[1]), 2)
     except Exception as e:
-        print(f"Erreur calcul temps/prix : {str(e)}")
+        print(f"Erreur dans get_price_and_time : {str(e)}")
         return None, None
+        
+        
 
 def calculate_route_distance(route_data):
     if not route_data:
@@ -222,12 +203,7 @@ def process_route_request(start, end, selected_vehicle_id):
         print(f"Erreur dans process_route_request: {str(e)}")
         return None
 
-def create_default_map():
-    """Crée une carte par défaut centrée sur la France"""
-    return folium.Map(
-        location=[46.603354, 1.888334],
-        zoom_start=6
-    )
+
 
 @app.route('/api/vehicles', methods=['GET'])
 def get_vehicles():
@@ -279,11 +255,7 @@ def calculate_charging_details():
         'price': price
     }
 
-@app.route('/api/default-map', methods=['GET'])
-def get_default_map():
-    """Route pour obtenir la carte par défaut"""
-    default_map = create_default_map()
-    return {'map': default_map._repr_html_()}
+
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
