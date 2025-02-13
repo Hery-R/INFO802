@@ -4,6 +4,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def get_coordinates(city):
+    """Récupère les coordonnées géographiques d'une ville
+      utiliser l'API HERE pour récupérer les coordonnées"""
+      
     api_key = os.getenv('HERE_API_KEY')
     url = f"https://geocode.search.hereapi.com/v1/geocode?q={city}&apiKey={api_key}"
     response = requests.get(url)

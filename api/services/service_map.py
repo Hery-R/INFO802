@@ -4,6 +4,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def get_map(start_lat, start_lon, end_lat, end_lon):
+    """Récupère la route entre deux points
+      utiliser l'API OpenRouteService pour récupérer la route"""
+      
     ORS_API_KEY = os.getenv('ORS_API_KEY')
     route_url = f"https://api.openrouteservice.org/v2/directions/driving-car"
     headers = {"Authorization": ORS_API_KEY}
