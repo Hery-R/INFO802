@@ -26,6 +26,10 @@
 ### Les routes de l'API
 
 * `/api/vehicles` : pour obtenir la liste des véhicules via `["GET"]`
+	+ par exemple :  [La liste des véhicules](https://flaskapp-e0a6a8cxe9bmffdu.francecentral-01.azurewebsites.net/api/vehicles)
+	
 * `/api/vehicle/{vehicle_id}` : pour obtenir les détails d'un véhicule via `["GET"]`
+	+ par exemple : [Pour l'Audi e-tron Sportback](https://flaskapp-e0a6a8cxe9bmffdu.francecentral-01.azurewebsites.net/api/vehicle/623bb4d935b2be28d404ea1a)
+
 * `/api/route` : pour calculer l'itinéraire ainsi que les données du genre le temps, le prix et les stations de recharge via `["POST"]`
 	+ en spécifiant les coordonnées de départ et d'arrivée, ainsi que l'ID du véhicule
