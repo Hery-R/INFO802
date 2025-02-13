@@ -9,7 +9,6 @@
 
 - [Voir le déploiement sur azure](https://proud-bay-09dfe3a1e.4.azurestaticapps.net)
 - [Voir l'api flask sur azure](https://flaskapp-e0a6a8cxe9bmffdu.francecentral-01.azurewebsites.net)
-    + "/api/vehicles" pour obtenir la liste des véhicules
 - [Voir l'api soap sur azure](https://soap-fca9amdze0b7fudw.francecentral-01.azurewebsites.net)
 
 ### Technologies
