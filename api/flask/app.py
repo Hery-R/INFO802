@@ -7,11 +7,18 @@ import service_city as ct
 import service_vehicle as vh
 import service_charging as ch
 from flask_cors import CORS
+import os
 
 app = Flask(__name__)
 CORS(app)  # Permet les requêtes cross-origin
 
-SOAP_URL = 'https://chargingsoap-bjh4gheuhee6hxe8.francecentral-01.azurewebsites.net'
+# Mettre à jour l'URL avec votre service SOAP déployé
+SOAP_URL = 'https://soap-fca9amdze0b7fudw.francecentral-01.azurewebsites.net/soap'
+
+# Route de test pour vérifier que l'application fonctionne
+@app.route('/')
+def home():
+    return "Flask API opérationnelle"
 
 def split_route_data(route_data, n):
     if not route_data or n <= 0:
@@ -227,8 +234,10 @@ def calculate_charging_details():
         'price': price
     }
 
-
+# Point d'entrée pour Azure
+application = app
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
 

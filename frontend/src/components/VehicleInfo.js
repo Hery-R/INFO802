@@ -13,7 +13,7 @@ const VehicleInfo = ({ vehicleDetails, routeInfo }) => {
         distance,
         time,
         price,
-        nbStations,
+        nb_stations: nbStations,
         optimalChargingTime
     } = routeInfo || {};
 
@@ -26,14 +26,16 @@ const VehicleInfo = ({ vehicleDetails, routeInfo }) => {
             {distance && (
                 <p>
                     <i className="fas fa-road"></i>
-                    <strong>Distance : </strong> {distance.toFixed(2)} km
+                    <strong>Distance : </strong> {Math.round(distance)} km
                 </p>
             )}
 
-            <p>
-                <i className="fas fa-battery-full"></i>
-                <strong>Autonomie : </strong> {range.chargetrip_range.best} km
-            </p>
+            {range?.chargetrip_range?.best && (
+                <p>
+                    <i className="fas fa-battery-full"></i>
+                    <strong>Autonomie : </strong> {range.chargetrip_range.best} km
+                </p>
+            )}
 
             {optimalChargingTime && (
                 <p>

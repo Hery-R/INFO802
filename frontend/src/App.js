@@ -4,7 +4,7 @@ import Map from './components/Map';
 import TripForm from './components/TripForm';
 import VehicleInfo from './components/VehicleInfo';
 
-const API_BASE_URL = 'https://chargingflask-drajetbaf6hvfddm.francecentral-01.azurewebsites.net';
+const API_BASE_URL = 'https://flaskapp-e0a6a8cxe9bmffdu.francecentral-01.azurewebsites.net';
 
 const App = () => {
     const [loading, setLoading] = useState(false);

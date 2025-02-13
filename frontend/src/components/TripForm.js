@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API_BASE_URL = 'https://chargingflask-drajetbaf6hvfddm.francecentral-01.azurewebsites.net';
+const API_BASE_URL = 'https://flaskapp-e0a6a8cxe9bmffdu.francecentral-01.azurewebsites.net';
 
 const TripForm = ({ onSubmit, loading }) => {
     const [vehicles, setVehicles] = useState([]);

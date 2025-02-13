@@ -22,7 +22,11 @@ const Map = ({ route, stations, startPoint, endPoint }) => {
     const center = [46.603354, 1.888334]; // Centre de la France
 
     useEffect(() => {
-        console.log('Données de la carte:', { route, stations, startPoint, endPoint });
+        // Validation des données reçues
+        if (route) console.log('Route reçue:', route.length, 'points');
+        if (stations) console.log('Stations reçues:', stations.length);
+        if (startPoint) console.log('Point de départ:', startPoint);
+        if (endPoint) console.log('Point d\'arrivée:', endPoint);
     }, [route, stations, startPoint, endPoint]);
 
     const stationIcon = L.icon({
