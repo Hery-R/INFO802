@@ -7,6 +7,10 @@
 - main : pour le tester localement
 - master : pour la production sur azure
 
+- [Voir le déploiement sur azure](https://proud-bay-09dfe3a1e.4.azurestaticapps.net)
+- [Voir l'api flask sur azure](https://flaskapp-e0a6a8cxe9bmffdu.francecentral-01.azurewebsites.net)
+- [Voir l'api soap sur azure](https://soap-fca9amdze0b7fudw.francecentral-01.azurewebsites.net)
+
 ### Technologies
 - Python pour les services et l'API 
 - React pour le frontend
