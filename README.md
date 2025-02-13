@@ -1,28 +1,27 @@
 # INFO802
-## Name : RASOAMIARAMANANA Hery ny aina
-## Description : Mini project for INFO802
+## Nom : RASOAMIARAMANANA Hery ny aina
+## Description : Mini-projet pour INFO802
+
+
+### Branches
+- main : pour le tester localement
+- master : pour la production sur azure
 
 ### Technologies
-- Python
-- Flask
+- Python pour les services et l'API 
+- React pour le frontend
 
 
 ### Installation
-```bash
-pip install -r requirements.txt
-```
-
-### Run
-```bash
-python app.py
-python services/service_charging.py
-python services/service_city.py
-python services/service_map.py
-python services/service_soap.py
-python services/service_vehicle.py
-```
-
-### Requirement
-- Python 3.9 (you will need this version to run service_soap)
+- lancer l'application app_soap.py (python 3.9 requis)
+- lancer l'application app_flask.py
+- lancer la commande npm install dans le dossier frontend
+- lancer le serveur de développement avec npm start dans le dossier frontend
 
 
+### Les routes de l'API
+
+* `/api/vehicles` : pour obtenir la liste des véhicules via `["GET"]`
+* `/api/vehicle/{vehicle_id}` : pour obtenir les détails d'un véhicule via `["GET"]`
+* `/api/route` : pour calculer l'itinéraire ainsi que les données du genre le temps, le prix et les stations de recharge via `["POST"]`
+	+ en spécifiant les coordonnées de départ et d'arrivée, ainsi que l'ID du véhicule
