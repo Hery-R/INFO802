@@ -10,6 +10,7 @@ import services.service_charging as ch
 app = Flask(__name__)
 
 def split_route_data(route_data, n):
+    """Divise une liste de données de route en sous-listes de taille égales."""
     if not route_data or n <= 0:
         return {}
     length = len(route_data)
@@ -28,10 +29,12 @@ def split_route_data(route_data, n):
 
     
 def get_optimal_charging_time(vehicle):
+    """Retourne le temps de recharge optimal pour un véhicule par rapport à ses connecteurs."""
     connectors = vehicle['connectors']
     return min(connector['time'] for connector in connectors)
 
 def get_price_and_time(distance, vehicle):
+    """Calcule le prix et le temps de recharge pour un véhicule en utilsant le service SOAP."""
     try:
         
         autonomy = float(vehicle['range']['chargetrip_range']['best'])
@@ -48,6 +51,7 @@ def get_price_and_time(distance, vehicle):
         
 
 def calculate_route_distance(route_data):
+    """Calcule la distance totale d'un itinéraire en calculant la somme des distances entre deux points successifs."""
     if not route_data:
         return 0
     return sum(
@@ -57,6 +61,7 @@ def calculate_route_distance(route_data):
     )
 
 def get_required_charges(total_distance, autonomy, safety_margin=0.8, max_charges=10):
+    """Calcule le nombre de recharges nécessaires pour une distance donnée en fonction de l'autonomie du véhicule."""
     if autonomy <= 0:
         return 0
     required_charges = math.ceil(total_distance / (autonomy * safety_margin))
@@ -64,6 +69,7 @@ def get_required_charges(total_distance, autonomy, safety_margin=0.8, max_charge
     return required_charges
 
 def get_search_points(segment):
+    """Sélectionne les points de recharges à partir d'un segment de ligne."""
     if not segment:
         return []
     return [
@@ -73,6 +79,7 @@ def get_search_points(segment):
     ]
 
 def is_duplicate_station(station, existing_stations, threshold=0.0001):
+    """Vérifie si un point de recharge est déjà présent dans une liste de points de recharges."""
     return any(
         abs(s['lat'] - station['lat']) < threshold and 
         abs(s['lon'] - station['lon']) < threshold 
@@ -80,6 +87,7 @@ def is_duplicate_station(station, existing_stations, threshold=0.0001):
     )
 
 def find_charging_stations(segments, number_charge_required):
+    """Trouve les points de recharges optimaux pour une distance totale et un nombre de recharges."""
     optimal_stations = []
     
     for i in range(number_charge_required):
@@ -96,6 +104,7 @@ def find_charging_stations(segments, number_charge_required):
     return optimal_stations
 
 def calculate_optimal_route(start_lat, start_lon, end_lat, end_lon, autonomy):
+    """Appelle les fonctions pour calculer l'itinéraire optimal et les stations de recharge."""
     if autonomy <= 0:
         return None, None
 
@@ -116,6 +125,7 @@ def calculate_optimal_route(start_lat, start_lon, end_lat, end_lon, autonomy):
 
 
 def process_route_request(start, end, selected_vehicle_id):
+    """Calcule les données que l'endpoint /api/route doit retourner."""
     try:
         vehicle_details = vh.get_vehicle_details(selected_vehicle_id)
         autonomy = float(vehicle_details["range"]["chargetrip_range"]["best"])

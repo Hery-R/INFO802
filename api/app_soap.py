@@ -22,6 +22,7 @@ class TimePriceService(ServiceBase):
             nb_recharges = distance / autonomy
             temps_recharge_total = nb_recharges * (recharge_time / 60)  # conversion en heures
             temps_conduite = distance / 90  # vitesse moyenne de 90 km/h
+            
             temps_total = temps_conduite + temps_recharge_total
             prix = temps_total * 2
             
