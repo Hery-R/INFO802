@@ -216,23 +216,6 @@ def calculate_route():
         return result
     return {'error': 'Impossible de calculer l\'itinéraire'}, 400
 
-@app.route('/api/charging-time', methods=['POST'])
-def calculate_charging_details():
-    """Route pour calculer le temps et le prix de recharge"""
-    data = request.get_json()
-    distance = data.get('distance')
-    vehicle_id = data.get('vehicle')
-    
-    if not all([distance, vehicle_id]):
-        return {'error': 'Paramètres manquants'}, 400
-        
-    vehicle_details = vh.get_vehicle_details(vehicle_id)["vehicle"]
-    time, price = get_price_and_time(distance, vehicle_details)
-    
-    return {
-        'charging_time': time,
-        'price': price
-    }
 
 # Point d'entrée pour Azure
 application = app
