@@ -33,7 +33,15 @@
 
 * `/api/route` : pour calculer l'itinéraire ainsi que les données du genre le temps, le prix et les stations de recharge via `["POST"]`
 
-	+ en spécifiant les coordonnées de départ et d'arrivée, ainsi que l'ID du véhicule
+	+ en spécifiant les coordonnées de départ et d'arrivée, ainsi que l'ID du véhicule dans le corps de la requête
+	
+		```json
+		{
+		"start": "Grenoble",
+		"end": "Paris",
+		"vehicle": "623bb4d935b2be28d404ea1a"
+		}
+		```
 
 	
 
