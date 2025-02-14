@@ -35,18 +35,7 @@
 
 	+ en spécifiant les coordonnées de départ et d'arrivée, ainsi que l'ID du véhicule
 
-	+ exemple de requête :
-		
-		* "start": {
-			"lat": 45.564601,
-			"lon": 5.917781
-		  },
-		* "end": {
-			"lat": 48.856614,
-			"lon": 2.352222
-		  },
-		* "vehicle_id": "623bb4d935b2be28d404ea1a"
-		
+	
 
 ### Mes services
 
